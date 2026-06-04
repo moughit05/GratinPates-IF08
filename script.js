@@ -7,7 +7,7 @@ let validCount = 0;
 // Fonction pour créer la carte HTML
 function addIngredient(texte_recette, product = null) {
     const content = document.createElement("div");
-    content.className = "col-12 col-sm-6 col-md-4 col-lg-3 card text-center p-3 mb-3 mx-2";
+    content.className = "col-12 col-sm-6 col-md-4 col-lg-3 mb-4";
 
     if (product) {
         const nutriScore = product.nutriscore_grade || "unknown";
@@ -17,22 +17,26 @@ function addIngredient(texte_recette, product = null) {
         const productName = product.product_name || "Produit inconnu";
 
         content.innerHTML = `
+        <div class="card h-100 shadow-sm">
             <img src="${imageUrl}" alt="${productName}" class="rounded-circle mx-auto mb-2"
                  style="width: 100px; height: 100px; object-fit: cover;" />
             <p class="fw-bold mb-1">${productName}</p>
             <p class="small text-muted">${texte_recette}</p>
             <img src="https://static.openfoodfacts.org/images/attributes/dist/nutriscore-${nutriScore}.svg"
                  alt="Nutri-Score ${nutriScore}" style="height: 40px; margin: 0 auto;">
-        `;
+        </div>
+                 `;
     } else {
         content.innerHTML = `
+        <div class="card h-100 shadow-sm">
             <img src="https://placehold.co/150x150/eeeeee/999999?text=Introuvable"
                  alt="Introuvable"
                  class="rounded-circle mx-auto mb-2"
                  style="width: 100px; height: 100px; object-fit: cover;" />
             <p class="fw-bold mb-1 text-danger">Données indisponibles</p>
             <p class="small text-muted">${texte_recette}</p>
-        `;
+        </div>
+            `;
     }
 
     plist.appendChild(content);
@@ -109,14 +113,19 @@ fetch("ingredients.json")
 
                     if (
                         data.status === 1 &&
-                        data.product &&
-                        data.product.nutriscore_score !== undefined
+                        data.product
                     ) {
                         addIngredient(item.texte, data.product);
 
-                        totalScore += data.product.nutriscore_score;
-                        validCount++;
-                    } else {
+                        if (
+                            typeof data.product.nutriscore_score === "number" &&
+                            !isNaN(data.product.nutriscore_score)
+                        ) {
+                            totalScore += data.product.nutriscore_score;
+                            validCount++;
+                        }
+                    }
+                    else {
                         addIngredient(item.texte, null);
                     }
                 })
